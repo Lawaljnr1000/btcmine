@@ -76,6 +76,19 @@
       font-size: 14px;
       color: #ccc;
     }
+    #withdrawal-form, #withdrawal-history {
+      margin-top: 30px;
+    }
+    #withdrawal-history ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    #withdrawal-history li {
+      margin: 5px 0;
+      padding: 10px;
+      background: #333;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -100,12 +113,27 @@
       <div id="balance">Current BTC: <strong id="btc-balance">0.0000000000000000</strong></div>
       <button id="claim-btn" style="display:none;">Claim BTC</button>
     </div>
+
+    <div id="withdrawal-form" style="display:none;">
+      <h3>Withdrawal</h3>
+      <p>Minimum Withdrawal: <strong>0.0000909800001941209 BTC</strong></p>
+      <input type="text" id="withdrawal-address" placeholder="Enter BTC Wallet Address" />
+      <button id="withdraw-btn">Withdraw</button>
+    </div>
+
+    <div id="withdrawal-history" style="display:none;">
+      <h3>Withdrawal History</h3>
+      <ul id="history-list"></ul>
+    </div>
   </div>
 
   <script>
     const miningDuration = 120000; // 2 minutes
     const miningRate = 0.0000000000000351125; // BTC/sec rate
+    const minimumWithdrawal = 0.0000909800001941209; // BTC
     let currentBalance = 0; // Initialize user's current balance to 0
+    let withdrawalHistory = []; // Store history of withdrawals
+
     const connectBtn = document.getElementById('connect-btn');
     const walletAddressDisplay = document.getElementById('wallet-address');
     const walletInfo = document.getElementById('wallet-info');
@@ -115,6 +143,11 @@
     const progressBar = document.getElementById('progress-bar');
     const btcBalance = document.getElementById('btc-balance');
     const claimBtn = document.getElementById('claim-btn');
+    const withdrawalForm = document.getElementById('withdrawal-form');
+    const withdrawalBtn = document.getElementById('withdraw-btn');
+    const withdrawalAddressInput = document.getElementById('withdrawal-address');
+    const withdrawalHistoryDiv = document.getElementById('withdrawal-history');
+    const historyList = document.getElementById('history-list');
 
     let web3;
     let userAccount;
@@ -191,6 +224,40 @@
       // After claiming, show the Start Mining button again.
       startBtn.style.display = 'inline-block';
     });
+
+    withdrawalBtn.addEventListener('click', () => {
+      const withdrawalAddress = withdrawalAddressInput.value;
+      if (currentBalance >= minimumWithdrawal) {
+        // Simulate a pending withdrawal
+        const withdrawalAmount = currentBalance;
+        const withdrawal = {
+          address: withdrawalAddress,
+          amount: withdrawalAmount,
+          status: 'Pending'
+        };
+
+        withdrawalHistory.push(withdrawal);
+        updateWithdrawalHistory();
+        currentBalance = currentBalance - withdrawalAmount; // Update balance after withdrawal
+        btcBalance.textContent = formatBTC(currentBalance); // Show remaining balance
+        alert(`Withdrawal initiated! Amount: ${formatBTC(withdrawal.amount)} BTC`);
+
+        withdrawalAddressInput.value = ''; // Clear input field
+        withdrawalForm.style.display = 'none'; // Hide withdrawal form
+      } else {
+        alert(`Minimum withdrawal is ${formatBTC(minimumWithdrawal)} BTC.`);
+      }
+    });
+
+    function updateWithdrawalHistory() {
+      historyList.innerHTML = '';
+      withdrawalHistory.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `To: ${item.address} | Amount: ${formatBTC(item.amount)} BTC | Status: ${item.status}`;
+        historyList.appendChild(listItem);
+      });
+      withdrawalHistoryDiv.style.display = 'block'; // Show withdrawal history
+    }
 
     window.addEventListener('beforeunload', (e) => {
       if (localStorage.getItem('miningStart')) {
