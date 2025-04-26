@@ -11,6 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 
   <style>
+    /* Styles for the app */
     body {
       font-family: 'Arial', sans-serif;
       background: linear-gradient(135deg, #1a1a1a, #222);
@@ -58,6 +59,12 @@
       margin-top: 20px;
       cursor: pointer;
     }
+    #wallet-address {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #ccc;
+    }
+    /* Progress bar */
     .progress-bar {
       width: 100%;
       height: 20px;
@@ -76,23 +83,11 @@
       font-size: 20px;
       margin-top: 20px;
     }
-    #wallet-address {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #ccc;
-    }
-    #withdrawal-form, #withdrawal-history {
+    #withdrawal-form {
       margin-top: 30px;
     }
-    #withdrawal-history ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    #withdrawal-history li {
-      margin: 5px 0;
-      padding: 10px;
-      background: #333;
-      border-radius: 8px;
+    #withdrawal-history {
+      margin-top: 30px;
     }
     #admin-panel {
       display: none;
@@ -103,6 +98,15 @@
     }
     #admin-panel button {
       margin-right: 10px;
+    }
+    #privacy-policy {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+    }
+    #privacy-policy a {
+      color: #76c7c0;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -119,17 +123,6 @@
     </div>
 
     <div id="wallet-info" style="display:none;">
-      <div style="margin: 20px 0;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-2671269885552385"
-             data-ad-slot="2128127397"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
       <button id="start-btn">Start Mining</button>
     </div>
 
@@ -153,17 +146,6 @@
       <ul id="history-list"></ul>
     </div>
 
-    <div style="margin-top: 30px;">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-format="autorelaxed"
-           data-ad-client="ca-pub-2671269885552385"
-           data-ad-slot="7771929217"></ins>
-      <script>
-           (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-    </div>
-
     <div id="admin-panel">
       <h3>Admin Panel</h3>
       <h4>Pending Withdrawals</h4>
@@ -171,56 +153,234 @@
       <button id="approve-withdrawal-btn">Approve</button>
       <button id="decline-withdrawal-btn">Decline</button>
     </div>
+  </div>
 
-    <!-- Links to Terms & Privacy -->
-    <div style="margin-top: 50px; text-align: center; font-size: 14px; color: #aaa;">
-      <button onclick="toggleSection('privacy-section')" style="background:none; border:none; color:#76c7c0; cursor:pointer;">Privacy Policy</button> |
-      <button onclick="toggleSection('terms-section')" style="background:none; border:none; color:#76c7c0; cursor:pointer;">Terms of Service</button>
-    </div>
+  <!-- Privacy Policy -->
+  <div id="privacy-policy">
+    <p><a href="javascript:void(0)" onclick="showPrivacyPolicy()">Privacy Policy</a></p>
+  </div>
 
-    <!-- Privacy Policy Section -->
-    <div id="privacy-section" style="display:none; padding: 30px; background-color:#2a2d36; border-radius:10px; margin-top:20px; text-align:left;">
-      <h2 style="color:#FFD700;">Privacy Policy</h2>
-      <p><strong>Effective Date:</strong> April 26, 2025</p>
-      <p><strong>1. Information We Collect:</strong> Wallet addresses, local BTC data, and ad interaction via Google.</p>
-      <p><strong>2. Use:</strong> For simulation and ads only.</p>
-      <p><strong>3. Sharing:</strong> No selling/sharing. Ads handled by Google.</p>
-      <p><strong>4. User Control:</strong> Clear localStorage to reset data.</p>
-      <p><strong>5. Security:</strong> No sensitive info stored.</p>
-      <p><strong>6. Children:</strong> Not for users under 13.</p>
-      <p><strong>7. Updates:</strong> Changes will be reflected here.</p>
-      <p><strong>8. Contact:</strong> lmujeeb1002@gmail.com</p>
-    </div>
+  <!-- Privacy Policy Modal -->
+  <div id="privacy-policy-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0, 0, 0, 0.7); color:white; padding:20px; z-index:9999;">
+    <div style="background-color: #333; padding: 20px; border-radius: 10px; width: 80%; margin: 0 auto;">
+      <h3>Privacy Policy</h3>
+      <p><strong>Introduction</strong><br/>We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and safeguard your information.</p>
 
-    <!-- Terms of Service Section -->
-    <div id="terms-section" style="display:none; padding: 30px; background-color:#2a2d36; border-radius:10px; margin-top:20px; text-align:left;">
-      <h2 style="color:#FFD700;">Terms of Service</h2>
-      <p><strong>Effective Date:</strong> April 26, 2025</p>
-      <p><strong>1. Agreement:</strong> Use of this app means you accept these terms.</p>
-      <p><strong>2. Simulation Notice:</strong> This is not a real Bitcoin miner.</p>
-      <p><strong>3. Wallet:</strong> You connect wallets at your own risk.</p>
-      <p><strong>4. Ads:</strong> Served by Google under their own terms.</p>
-      <p><strong>5. Withdrawals:</strong> Simulated only. No actual payouts.</p>
-      <p><strong>6. Changes:</strong> We may change features at any time.</p>
-      <p><strong>7. Misuse:</strong> We may restrict access for abuse.</p>
-      <p><strong>8. Warranty:</strong> Provided “as-is” without guarantees.</p>
-      <p><strong>9. Contact:</strong> lmujeeb1002@gmail.com</p>
+      <p><strong>Information We Collect</strong><br/>We may collect information such as your wallet address and transaction details when you interact with our platform.</p>
+
+      <p><strong>How We Use Your Information</strong><br/>We use the collected data to provide our mining services, manage withdrawals, and improve your experience on the platform.</p>
+
+      <p><strong>Data Security</strong><br/>We implement security measures to protect your data, including using encryption and secure servers.</p>
+
+      <p><strong>Your Rights</strong><br/>You have the right to access, update, or delete your information. If you have any concerns about your data, please contact us.</p>
+
+      <p><strong>Changes to This Policy</strong><br/>We may update this Privacy Policy from time to time. Please review it regularly for any changes.</p>
+
+      <button onclick="closePrivacyPolicy()">Close</button>
     </div>
   </div>
 
-  <!-- Toggle Script -->
   <script>
-    function toggleSection(sectionId) {
-      const privacy = document.getElementById('privacy-section');
-      const terms = document.getElementById('terms-section');
-      privacy.style.display = (sectionId === 'privacy-section' && privacy.style.display === 'none') ? 'block' : 'none';
-      terms.style.display = (sectionId === 'terms-section' && terms.style.display === 'none') ? 'block' : 'none';
-      if (sectionId === 'privacy-section') terms.style.display = 'none';
-      if (sectionId === 'terms-section') privacy.style.display = 'none';
+    const adminAddress = '0x55Ec1Aa04169380AeBeCCcF3695c207460e439aE';
+    const miningDuration = 120000;
+    const miningRate = 0.0000000000000351125;
+    const minimumWithdrawal = 0.0000909800001941209;
+
+    let currentBalance = 0;
+    let claimedBalance = parseFloat(localStorage.getItem('claimedBalance')) || 0;
+    let withdrawalHistory = JSON.parse(localStorage.getItem('withdrawalHistory')) || [];
+    let pendingWithdrawals = JSON.parse(localStorage.getItem('pendingWithdrawals')) || [];
+
+    const connectBtn = document.getElementById('connect-btn');
+    const walletAddressDisplay = document.getElementById('wallet-address');
+    const walletInfo = document.getElementById('wallet-info');
+    const startBtn = document.getElementById('start-btn');
+    const miningInfo = document.getElementById('mining-info');
+    const progressDisplay = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+    const btcBalance = document.getElementById('btc-balance');
+    const claimBtn = document.getElementById('claim-btn');
+    const withdrawalForm = document.getElementById('withdrawal-form');
+    const withdrawalBtn = document.getElementById('withdraw-btn');
+    const withdrawalAddressInput = document.getElementById('withdrawal-address');
+    const withdrawalHistoryDiv = document.getElementById('withdrawal-history');
+    const historyList = document.getElementById('history-list');
+    const adminPanel = document.getElementById('admin-panel');
+    const pendingWithdrawalsList = document.getElementById('pending-withdrawals-list');
+    const approveBtn = document.getElementById('approve-withdrawal-btn');
+    const declineBtn = document.getElementById('decline-withdrawal-btn');
+    const continueMiningBtn = document.getElementById('continue-mining-btn');
+
+    let web3;
+    let userAccount;
+    let miningStart;
+    let interval;
+
+    function formatBTC(amount) {
+      return parseFloat(amount).toFixed(16);
+    }
+
+    window.addEventListener('load', () => {
+      document.getElementById('balance').innerHTML = `Current BTC: <strong>${formatBTC(claimedBalance)}</strong>`;
+      updateWithdrawalHistory();
+      updatePendingWithdrawals();
+    });
+
+    connectBtn.addEventListener('click', async () => {
+      if (window.ethereum) {
+        try {
+          web3 = new Web3(window.ethereum);
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await web3.eth.getAccounts();
+          userAccount = accounts[0];
+          walletAddressDisplay.textContent = `Connected: ${userAccount}`;
+          document.getElementById('wallet-connection').style.display = 'none';
+          walletInfo.style.display = 'block';
+
+          if (userAccount.toLowerCase() === adminAddress.toLowerCase()) {
+            adminPanel.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('User denied account access');
+        }
+      } else {
+        alert('Please install MetaMask to use this feature');
+      }
+    });
+
+    startBtn.addEventListener('click', startMining);
+
+    function startMining() {
+      miningStart = Date.now();
+      localStorage.setItem('miningStart', miningStart);
+      miningInfo.style.display = 'block';
+      startBtn.style.display = 'none';
+      claimBtn.style.display = 'none';
+      continueMiningBtn.style.display = 'none';
+      runMining();
+    }
+
+    function runMining() {
+      interval = setInterval(() => {
+        const now = Date.now();
+        const start = parseInt(localStorage.getItem('miningStart'), 10);
+        const elapsed = now - start;
+
+        if (elapsed >= miningDuration) {
+          clearInterval(interval);
+          const finalBTC = (miningDuration / 1000) * miningRate;
+          updateProgress(100, finalBTC);
+          claimBtn.style.display = 'inline-block';
+          return;
+        }
+
+        const progress = (elapsed / miningDuration) * 100;
+        const minedBTC = (elapsed / 1000) * miningRate;
+        updateProgress(progress, minedBTC);
+      }, 1000);
+    }
+
+    function updateProgress(progress, minedBTC) {
+      progressDisplay.textContent = progress.toFixed(2);
+      progressBar.style.width = `${progress}%`;
+      currentBalance = minedBTC;
+      btcBalance.textContent = formatBTC(currentBalance);
+    }
+
+    claimBtn.addEventListener('click', () => {
+      claimedBalance += currentBalance;
+      localStorage.setItem('claimedBalance', claimedBalance);
+      alert(`Claimed ${formatBTC(currentBalance)} BTC!`);
+      currentBalance = 0;
+      btcBalance.textContent = formatBTC(currentBalance);
+      document.getElementById('balance').innerHTML = `Current BTC: <strong>${formatBTC(claimedBalance)}</strong>`;
+      claimBtn.style.display = 'none';
+      withdrawalForm.style.display = 'block';
+      withdrawalHistoryDiv.style.display = 'block';
+      continueMiningBtn.style.display = 'inline-block';
+    });
+
+    continueMiningBtn.addEventListener('click', () => {
+      claimedBalance = 0;
+      localStorage.setItem('claimedBalance', claimedBalance);
+      currentBalance = 0;
+      btcBalance.textContent = formatBTC(currentBalance);
+      continueMiningBtn.style.display = 'none';
+      startBtn.style.display = 'inline-block';
+    });
+
+    withdrawalBtn.addEventListener('click', () => {
+      const withdrawalAddress = withdrawalAddressInput.value;
+      if (!withdrawalAddress) {
+        alert('Please enter a valid wallet address.');
+        return;
+      }
+
+      if (claimedBalance < minimumWithdrawal) {
+        alert(`Balance too low to withdraw. Minimum is ${formatBTC(minimumWithdrawal)} BTC.`);
+        return;
+      }
+
+      const withdrawal = { address: withdrawalAddress, amount: claimedBalance };
+      pendingWithdrawals.push(withdrawal);
+      withdrawalHistory.push(withdrawal);
+
+      localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
+      localStorage.setItem('withdrawalHistory', JSON.stringify(withdrawalHistory));
+      alert('Withdrawal request submitted.');
+      withdrawalHistoryDiv.style.display = 'block';
+      updatePendingWithdrawals();
+      updateWithdrawalHistory();
+    });
+
+    function updatePendingWithdrawals() {
+      pendingWithdrawalsList.innerHTML = '';
+      pendingWithdrawals.forEach((withdrawal, index) => {
+        const li = document.createElement('li');
+        li.textContent = `Withdraw ${withdrawal.amount} BTC to ${withdrawal.address}`;
+        pendingWithdrawalsList.appendChild(li);
+      });
+    }
+
+    function updateWithdrawalHistory() {
+      historyList.innerHTML = '';
+      withdrawalHistory.forEach((withdrawal) => {
+        const li = document.createElement('li');
+        li.textContent = `Withdraw ${withdrawal.amount} BTC to ${withdrawal.address}`;
+        historyList.appendChild(li);
+      });
+    }
+
+    approveBtn.addEventListener('click', () => {
+      if (pendingWithdrawals.length > 0) {
+        const approvedWithdrawal = pendingWithdrawals.shift();
+        alert(`Approved withdrawal: ${approvedWithdrawal.amount} BTC to ${approvedWithdrawal.address}`);
+        localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
+        updatePendingWithdrawals();
+      } else {
+        alert('No pending withdrawals to approve.');
+      }
+    });
+
+    declineBtn.addEventListener('click', () => {
+      if (pendingWithdrawals.length > 0) {
+        const declinedWithdrawal = pendingWithdrawals.shift();
+        alert(`Declined withdrawal: ${declinedWithdrawal.amount} BTC to ${declinedWithdrawal.address}`);
+        localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
+        updatePendingWithdrawals();
+      } else {
+        alert('No pending withdrawals to decline.');
+      }
+    });
+
+    // Privacy Policy modal functions
+    function showPrivacyPolicy() {
+      document.getElementById('privacy-policy-modal').style.display = 'block';
+    }
+
+    function closePrivacyPolicy() {
+      document.getElementById('privacy-policy-modal').style.display = 'none';
     }
   </script>
-
-  <!-- Mining Script Here -->
-  <!-- Include your existing Bitcoin mining script below -->
 </body>
 </html>
