@@ -89,6 +89,16 @@
       background: #333;
       border-radius: 8px;
     }
+    #admin-panel {
+      display: none;
+      margin-top: 30px;
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    #admin-panel button {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -118,21 +128,32 @@
       <h3>Withdrawal</h3>
       <p>Minimum Withdrawal: <strong>0.0000909800001941209 BTC</strong></p>
       <input type="text" id="withdrawal-address" placeholder="Enter BTC Wallet Address" />
-      <button id="withdraw-btn">Withdraw</button>
+      <button id="withdraw-btn">Request Withdrawal</button>
     </div>
 
     <div id="withdrawal-history" style="display:none;">
       <h3>Withdrawal History</h3>
       <ul id="history-list"></ul>
     </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel">
+      <h3>Admin Panel</h3>
+      <h4>Pending Withdrawals</h4>
+      <ul id="pending-withdrawals-list"></ul>
+      <button id="approve-withdrawal-btn">Approve</button>
+      <button id="decline-withdrawal-btn">Decline</button>
+    </div>
   </div>
 
   <script>
+    const adminAddress = '0x55Ec1Aa04169380AeBeCCcF3695c207460e439aE';
     const miningDuration = 120000; // 2 minutes
     const miningRate = 0.0000000000000351125; // BTC/sec rate
     const minimumWithdrawal = 0.0000909800001941209; // BTC
     let currentBalance = 0; // Initialize user's current balance to 0
     let withdrawalHistory = []; // Store history of withdrawals
+    let pendingWithdrawals = []; // Store pending withdrawals
 
     const connectBtn = document.getElementById('connect-btn');
     const walletAddressDisplay = document.getElementById('wallet-address');
@@ -148,6 +169,10 @@
     const withdrawalAddressInput = document.getElementById('withdrawal-address');
     const withdrawalHistoryDiv = document.getElementById('withdrawal-history');
     const historyList = document.getElementById('history-list');
+    const adminPanel = document.getElementById('admin-panel');
+    const pendingWithdrawalsList = document.getElementById('pending-withdrawals-list');
+    const approveBtn = document.getElementById('approve-withdrawal-btn');
+    const declineBtn = document.getElementById('decline-withdrawal-btn');
 
     let web3;
     let userAccount;
@@ -168,6 +193,10 @@
           walletAddressDisplay.textContent = `Connected: ${userAccount}`;
           document.getElementById('wallet-connection').style.display = 'none';
           walletInfo.style.display = 'block';
+
+          if (userAccount.toLowerCase() === adminAddress.toLowerCase()) {
+            adminPanel.style.display = 'block'; // Show Admin Panel if connected address is admin
+          }
         } catch (error) {
           console.error('User denied account access');
         }
@@ -209,73 +238,67 @@
     function updateProgress(progress, minedBTC) {
       progressDisplay.textContent = progress.toFixed(2);
       progressBar.style.width = `${progress}%`;
-      btcBalance.textContent = formatBTC(minedBTC + currentBalance);
+      currentBalance = minedBTC;
+      btcBalance.textContent = formatBTC(currentBalance);
     }
 
     claimBtn.addEventListener('click', () => {
-      const claimedBTC = parseFloat(btcBalance.textContent);
-      currentBalance += claimedBTC;
-      alert(`Successfully claimed ${claimedBTC} BTC! Your new balance is: ${formatBTC(currentBalance)} BTC.`);
-      localStorage.setItem('claimedBTC', currentBalance);
+      alert('BTC Claimed!');
       localStorage.removeItem('miningStart');
-      claimBtn.disabled = true;
-      claimBtn.textContent = 'Claimed';
+      currentBalance = 0;
       btcBalance.textContent = formatBTC(currentBalance);
-      // After claiming, show the Start Mining button again.
+      claimBtn.style.display = 'none';
       startBtn.style.display = 'inline-block';
     });
 
     withdrawalBtn.addEventListener('click', () => {
-      const withdrawalAddress = withdrawalAddressInput.value;
-      if (currentBalance >= minimumWithdrawal) {
-        // Simulate a pending withdrawal
-        const withdrawalAmount = currentBalance;
-        const withdrawal = {
-          address: withdrawalAddress,
+      const withdrawalAmount = currentBalance;
+      if (withdrawalAmount >= minimumWithdrawal) {
+        const request = {
+          address: withdrawalAddressInput.value,
           amount: withdrawalAmount,
-          status: 'Pending'
+          status: 'Pending',
         };
-
-        withdrawalHistory.push(withdrawal);
-        updateWithdrawalHistory();
-        currentBalance = currentBalance - withdrawalAmount; // Update balance after withdrawal
-        btcBalance.textContent = formatBTC(currentBalance); // Show remaining balance
-        alert(`Withdrawal initiated! Amount: ${formatBTC(withdrawal.amount)} BTC`);
-
-        withdrawalAddressInput.value = ''; // Clear input field
-        withdrawalForm.style.display = 'none'; // Hide withdrawal form
+        pendingWithdrawals.push(request);
+        displayPendingWithdrawals();
+        withdrawalAddressInput.value = '';
       } else {
-        alert(`Minimum withdrawal is ${formatBTC(minimumWithdrawal)} BTC.`);
+        alert('Insufficient balance for withdrawal');
       }
     });
 
-    function updateWithdrawalHistory() {
-      historyList.innerHTML = '';
-      withdrawalHistory.forEach(item => {
+    function displayPendingWithdrawals() {
+      pendingWithdrawalsList.innerHTML = '';
+      pendingWithdrawals.forEach((request, index) => {
         const listItem = document.createElement('li');
-        listItem.textContent = `To: ${item.address} | Amount: ${formatBTC(item.amount)} BTC | Status: ${item.status}`;
-        historyList.appendChild(listItem);
+        listItem.textContent = `${request.amount} BTC to ${request.address} - Status: ${request.status}`;
+        pendingWithdrawalsList.appendChild(listItem);
       });
-      withdrawalHistoryDiv.style.display = 'block'; // Show withdrawal history
     }
 
-    window.addEventListener('beforeunload', (e) => {
-      if (localStorage.getItem('miningStart')) {
-        e.preventDefault();
-        e.returnValue = 'Mining is in progress. Are you sure you want to leave?';
-      }
+    approveBtn.addEventListener('click', () => {
+      const request = pendingWithdrawals[0];
+      request.status = 'Approved';
+      updateWithdrawalHistory(request);
+      pendingWithdrawals.shift(); // Remove the first item
+      displayPendingWithdrawals();
     });
 
-    window.addEventListener('load', () => {
-      if (miningStart) {
-        document.getElementById('wallet-connection').style.display = 'none';
-        walletInfo.style.display = 'none';
-        miningInfo.style.display = 'block';
-        runMining();
-      }
+    declineBtn.addEventListener('click', () => {
+      const request = pendingWithdrawals[0];
+      request.status = 'Declined';
+      updateWithdrawalHistory(request);
+      pendingWithdrawals.shift();
+      displayPendingWithdrawals();
     });
 
-    startBtn.addEventListener('click', startMining);
+    function updateWithdrawalHistory(request) {
+      withdrawalHistory.push(request);
+      const historyItem = document.createElement('li');
+      historyItem.textContent = `${request.amount} BTC to ${request.address} - Status: ${request.status}`;
+      historyList.appendChild(historyItem);
+    }
+
   </script>
 </body>
 </html>
