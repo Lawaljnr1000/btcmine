@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>$ Bitcoin Miner $</title>
+
+  <!-- Google AdSense Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2671269885552385"
+     crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #222);
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color: #2a2d36;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 10px;
+    }
+
+    .coin {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px auto;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 3s infinite linear;
+    }
+
+    .coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 50%;
+    }
+
+    .coin-back {
+      transform: rotateY(180deg) scaleX(-1);
+    }
+
+    .coin-face img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    @keyframes rotate {
+      to {
+        transform: rotateY(360deg);
+      }
+    }
+
+    button {
+      padding: 12px 25px;
+      margin: 15px 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    p {
+      font-size: 18px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      background-color: #76c7c0;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Display Banner Ad -->
+    <ins class="adsbygoogle"
+         style="display:block; margin: 20px auto; max-width: 100%;"
+         data-ad-client="ca-pub-2671269885552385"
+         data-ad-slot="2128127397"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+    <!-- Rotating Coin -->
+    <div class="coin">
+      <div class="coin-face">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Bitcoin Front">
+      </div>
+      <div class="coin-face coin-back">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png" alt="Bitcoin Back">
+      </div>
+    </div>
+
+    <h1>$ Bitcoin Miner $</h1>
+
+    <div id="wallet-info">
+      <button id="connect-btn">Connect Wallet</button>
+      <p id="wallet-address"></p>
+    </div>
+
+    <div id="mining-info" style="display: none;">
+      <p>Mining Progress: <span id="progress">0</span>%</p>
+      <div class="progress-bar">
+        <span id="progress-bar" style="width: 0%;"></span>
+      </div>
+      <button id="start-mining-btn">Start Mining ⛏️</button>
+      <button id="stop-mining-btn" style="display: none;">Stop Mining ⛔</button>
+    </div>
+
+    <!-- Multiplex Ads BELOW the mining section -->
+    <ins class="adsbygoogle"
+         style="display:block; margin: 30px auto; max-width: 100%;"
+         data-ad-format="autorelaxed"
+         data-ad-client="ca-pub-2671269885552385"
+         data-ad-slot="7771929217"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script>
+    const connectBtn = document.getElementById('connect-btn');
+    const walletAddressDisplay = document.getElementById('wallet-address');
+    const startMiningBtn = document.getElementById('start-mining-btn');
+    const stopMiningBtn = document.getElementById('stop-mining-btn');
+    const progressDisplay = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+
+    let web3;
+    let userAccount;
+    let miningInterval;
+    let minedAmount = 0;
+    const targetAmount = 0.0099;
+    const miningRate = 0.00000000382;
+
+    connectBtn.addEventListener('click', async () => {
+      if (window.ethereum) {
+        try {
+          web3 = new Web3(window.ethereum);
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await web3.eth.getAccounts();
+          userAccount = accounts[0];
+          walletAddressDisplay.textContent = `Connected: ${userAccount}`;
+          document.getElementById('wallet-info').style.display = 'none';
+          document.getElementById('mining-info').style.display = 'block';
+          startMiningBtn.disabled = false;
+        } catch (error) {
+          console.error('User denied account access');
+        }
+      } else {
+        alert('Please install MetaMask to use this feature');
+      }
+    });
+
+    startMiningBtn.addEventListener('click', () => {
+      miningInterval = setInterval(() => {
+        minedAmount += miningRate;
+        const progress = Math.min((minedAmount / targetAmount) * 100, 100);
+        progressDisplay.textContent = progress.toFixed(2);
+        progressBar.style.width = `${progress}%`;
+        if (minedAmount >= targetAmount) {
+          clearInterval(miningInterval);
+          alert('Mining complete! 🎉');
+          startMiningBtn.disabled = true;
+          stopMiningBtn.style.display = 'none';
+        }
+      }, 1000);
+      startMiningBtn.disabled = true;
+      stopMiningBtn.style.display = 'inline-block';
+    });
+
+    stopMiningBtn.addEventListener('click', () => {
+      clearInterval(miningInterval);
+      startMiningBtn.disabled = false;
+      stopMiningBtn.style.display = 'none';
+      alert('Mining stopped. 🛑');
+    });
+  </script>
+</body>
+</html>
