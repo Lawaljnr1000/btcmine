@@ -149,6 +149,7 @@
       localStorage.setItem('miningStart', now);
       miningInfo.style.display = 'block';
       startBtn.style.display = 'none';
+      claimBtn.style.display = 'none';
       runMining();
     }
 
@@ -187,6 +188,8 @@
       claimBtn.disabled = true;
       claimBtn.textContent = 'Claimed';
       btcBalance.textContent = formatBTC(currentBalance);
+      // After claiming, show the Start Mining button again.
+      startBtn.style.display = 'inline-block';
     });
 
     window.addEventListener('beforeunload', (e) => {
