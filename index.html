@@ -176,7 +176,7 @@
 
     let web3;
     let userAccount;
-    let miningStart = localStorage.getItem('miningStart');
+    let miningStart;
     let interval;
 
     function formatBTC(amount) {
@@ -205,10 +205,11 @@
       }
     });
 
+    startBtn.addEventListener('click', startMining);
+
     function startMining() {
-      const now = Date.now();
-      miningStart = now;
-      localStorage.setItem('miningStart', now);
+      miningStart = Date.now();
+      localStorage.setItem('miningStart', miningStart);
       miningInfo.style.display = 'block';
       startBtn.style.display = 'none';
       claimBtn.style.display = 'none';
@@ -242,63 +243,60 @@
       btcBalance.textContent = formatBTC(currentBalance);
     }
 
-    claimBtn.addEventListener('click', () => {
-      alert('BTC Claimed!');
-      localStorage.removeItem('miningStart');
-      currentBalance = 0;
-      btcBalance.textContent = formatBTC(currentBalance);
-      claimBtn.style.display = 'none';
-      startBtn.style.display = 'inline-block';
-    });
+    claimBtn.addEventListener('click', claimBTC);
 
-    withdrawalBtn.addEventListener('click', () => {
-      const withdrawalAmount = currentBalance;
-      if (withdrawalAmount >= minimumWithdrawal) {
-        const request = {
-          address: withdrawalAddressInput.value,
-          amount: withdrawalAmount,
-          status: 'Pending',
-        };
-        pendingWithdrawals.push(request);
-        displayPendingWithdrawals();
-        withdrawalAddressInput.value = '';
+    function claimBTC() {
+      if (currentBalance >= minimumWithdrawal) {
+        withdrawalHistory.push({ address: userAccount, amount: currentBalance });
+        updateWithdrawalHistory();
+        currentBalance = 0;
+        btcBalance.textContent = formatBTC(currentBalance);
+        alert(`Successfully requested a withdrawal of ${currentBalance} BTC`);
       } else {
-        alert('Insufficient balance for withdrawal');
+        alert('Your balance is below the minimum withdrawal limit.');
       }
-    });
+    }
 
-    function displayPendingWithdrawals() {
-      pendingWithdrawalsList.innerHTML = '';
-      pendingWithdrawals.forEach((request, index) => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${request.amount} BTC to ${request.address} - Status: ${request.status}`;
-        pendingWithdrawalsList.appendChild(listItem);
+    function updateWithdrawalHistory() {
+      historyList.innerHTML = '';
+      withdrawalHistory.forEach(tx => {
+        const li = document.createElement('li');
+        li.textContent = `Withdrawal to: ${tx.address} | Amount: ${tx.amount} BTC`;
+        historyList.appendChild(li);
       });
     }
 
+    withdrawalBtn.addEventListener('click', () => {
+      const withdrawalAddress = withdrawalAddressInput.value;
+      if (withdrawalAddress) {
+        alert(`Withdrawal requested to ${withdrawalAddress}`);
+      }
+    });
+
     approveBtn.addEventListener('click', () => {
-      const request = pendingWithdrawals[0];
-      request.status = 'Approved';
-      updateWithdrawalHistory(request);
-      pendingWithdrawals.shift(); // Remove the first item
-      displayPendingWithdrawals();
+      if (pendingWithdrawals.length > 0) {
+        const withdrawal = pendingWithdrawals.shift();
+        alert(`Approved withdrawal of ${withdrawal.amount} BTC to ${withdrawal.address}`);
+        updatePendingWithdrawals();
+      }
     });
 
     declineBtn.addEventListener('click', () => {
-      const request = pendingWithdrawals[0];
-      request.status = 'Declined';
-      updateWithdrawalHistory(request);
-      pendingWithdrawals.shift();
-      displayPendingWithdrawals();
+      if (pendingWithdrawals.length > 0) {
+        const withdrawal = pendingWithdrawals.shift();
+        alert(`Declined withdrawal of ${withdrawal.amount} BTC to ${withdrawal.address}`);
+        updatePendingWithdrawals();
+      }
     });
 
-    function updateWithdrawalHistory(request) {
-      withdrawalHistory.push(request);
-      const historyItem = document.createElement('li');
-      historyItem.textContent = `${request.amount} BTC to ${request.address} - Status: ${request.status}`;
-      historyList.appendChild(historyItem);
+    function updatePendingWithdrawals() {
+      pendingWithdrawalsList.innerHTML = '';
+      pendingWithdrawals.forEach(w => {
+        const li = document.createElement('li');
+        li.textContent = `Withdrawal to: ${w.address} | Amount: ${w.amount} BTC`;
+        pendingWithdrawalsList.appendChild(li);
+      });
     }
-
   </script>
 </body>
 </html>
