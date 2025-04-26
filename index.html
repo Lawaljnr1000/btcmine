@@ -6,7 +6,7 @@
   <meta name="google-adsense-account" content="ca-pub-2671269885552385">
   <title>$ Bitcoin Miner $</title>
 
-  <!-- Google AdSense Script -->
+  <!-- Google AdSense Script (Only once) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2671269885552385" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 
@@ -180,6 +180,17 @@
     </div>
   </div>
 
+  <!-- Google AdSense Ad (Banner) -->
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-2671269885552385"
+       data-ad-slot="2128127397"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+
   <script>
     const adminAddress = '0x55Ec1Aa04169380AeBeCCcF3695c207460e439aE';
     const miningDuration = 120000;
@@ -317,63 +328,60 @@
       }
 
       if (claimedBalance < minimumWithdrawal) {
-        alert(`Balance too low to withdraw. Minimum is ${formatBTC(minimumWithdrawal)} BTC.`);
+        alert(`Balance too low to withdraw. Minimum withdrawal is ${formatBTC(minimumWithdrawal)} BTC.`);
         return;
       }
 
-      const withdrawal = { address: withdrawalAddress, amount: claimedBalance };
-      pendingWithdrawals.push(withdrawal);
-      withdrawalHistory.push(withdrawal);
-
+      pendingWithdrawals.push({ address: withdrawalAddress, amount: claimedBalance });
       localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
-      localStorage.setItem('withdrawalHistory', JSON.stringify(withdrawalHistory));
-      alert('Withdrawal request submitted.');
-      withdrawalHistoryDiv.style.display = 'block';
       updatePendingWithdrawals();
-      updateWithdrawalHistory();
+      claimedBalance = 0;
+      localStorage.setItem('claimedBalance', claimedBalance);
+      alert(`Withdrawal request for ${formatBTC(claimedBalance)} BTC has been sent.`);
+      withdrawalAddressInput.value = '';
+      withdrawalForm.style.display = 'none';
+      withdrawalHistoryDiv.style.display = 'block';
     });
 
     function updatePendingWithdrawals() {
       pendingWithdrawalsList.innerHTML = '';
-      pendingWithdrawals.forEach((withdrawal, index) => {
-        const li = document.createElement('li');
-        li.textContent = `Withdraw ${withdrawal.amount} BTC to ${withdrawal.address}`;
-        pendingWithdrawalsList.appendChild(li);
+      pendingWithdrawals.forEach((request, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${formatBTC(request.amount)} BTC to ${request.address}`;
+        pendingWithdrawalsList.appendChild(listItem);
       });
     }
 
     function updateWithdrawalHistory() {
       historyList.innerHTML = '';
-      withdrawalHistory.forEach((withdrawal) => {
-        const li = document.createElement('li');
-        li.textContent = `Withdraw ${withdrawal.amount} BTC to ${withdrawal.address}`;
-        historyList.appendChild(li);
+      withdrawalHistory.forEach((record) => {
+        const historyItem = document.createElement('li');
+        historyItem.textContent = `${formatBTC(record.amount)} BTC to ${record.address}`;
+        historyList.appendChild(historyItem);
       });
     }
 
     approveBtn.addEventListener('click', () => {
-      if (pendingWithdrawals.length > 0) {
-        const approvedWithdrawal = pendingWithdrawals.shift();
-        alert(`Approved withdrawal: ${approvedWithdrawal.amount} BTC to ${approvedWithdrawal.address}`);
-        localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
-        updatePendingWithdrawals();
-      } else {
-        alert('No pending withdrawals to approve.');
-      }
+      if (pendingWithdrawals.length === 0) return;
+
+      const approvedRequest = pendingWithdrawals.pop();
+      withdrawalHistory.push(approvedRequest);
+      localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
+      localStorage.setItem('withdrawalHistory', JSON.stringify(withdrawalHistory));
+      updatePendingWithdrawals();
+      updateWithdrawalHistory();
+      alert(`Approved withdrawal of ${formatBTC(approvedRequest.amount)} BTC.`);
     });
 
     declineBtn.addEventListener('click', () => {
-      if (pendingWithdrawals.length > 0) {
-        const declinedWithdrawal = pendingWithdrawals.shift();
-        alert(`Declined withdrawal: ${declinedWithdrawal.amount} BTC to ${declinedWithdrawal.address}`);
-        localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
-        updatePendingWithdrawals();
-      } else {
-        alert('No pending withdrawals to decline.');
-      }
+      if (pendingWithdrawals.length === 0) return;
+
+      pendingWithdrawals.pop();
+      localStorage.setItem('pendingWithdrawals', JSON.stringify(pendingWithdrawals));
+      updatePendingWithdrawals();
+      alert('Declined the latest withdrawal request.');
     });
 
-    // Privacy Policy modal functions
     function showPrivacyPolicy() {
       document.getElementById('privacy-policy-modal').style.display = 'block';
     }
