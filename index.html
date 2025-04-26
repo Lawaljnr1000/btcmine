@@ -122,6 +122,7 @@
       <div class="progress-bar"><span id="progress-bar" style="width: 0%;"></span></div>
       <div id="balance">Current BTC: <strong id="btc-balance">0.0000000000000000</strong></div>
       <button id="claim-btn" style="display:none;">Claim BTC</button>
+      <button id="continue-mining-btn" style="display:none;">Continue Mining</button> <!-- New button -->
     </div>
 
     <div id="withdrawal-form" style="display:none;">
@@ -174,6 +175,7 @@
     const pendingWithdrawalsList = document.getElementById('pending-withdrawals-list');
     const approveBtn = document.getElementById('approve-withdrawal-btn');
     const declineBtn = document.getElementById('decline-withdrawal-btn');
+    const continueMiningBtn = document.getElementById('continue-mining-btn'); // New button reference
 
     let web3;
     let userAccount;
@@ -220,6 +222,7 @@
       miningInfo.style.display = 'block';
       startBtn.style.display = 'none';
       claimBtn.style.display = 'none';
+      continueMiningBtn.style.display = 'none'; // Hide "Continue Mining" at start
       runMining();
     }
 
@@ -260,6 +263,18 @@
       claimBtn.style.display = 'none';
       withdrawalForm.style.display = 'block';
       withdrawalHistoryDiv.style.display = 'block';
+      continueMiningBtn.style.display = 'inline-block'; // Show "Continue Mining" after claiming
+    });
+
+    continueMiningBtn.addEventListener('click', () => {
+      claimedBalance = 0; // Reset claimed balance for the next mining session
+      localStorage.setItem('claimedBalance', claimedBalance); // Store updated balance
+      currentBalance = 0; // Reset current mining balance
+      btcBalance.textContent = formatBTC(currentBalance); // Update UI
+
+      // Hide the "Continue Mining" button and show "Start Mining" again
+      continueMiningBtn.style.display = 'none';
+      startBtn.style.display = 'inline-block';
     });
 
     withdrawalBtn.addEventListener('click', () => {
