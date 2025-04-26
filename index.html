@@ -97,14 +97,15 @@
     <div id="mining-info" style="display:none;">
       <p>Mining Progress: <span id="progress">0</span>%</p>
       <div class="progress-bar"><span id="progress-bar" style="width: 0%;"></span></div>
-      <div id="balance">Current BTC: <strong id="btc-balance">0.00000000</strong></div>
+      <div id="balance">Current BTC: <strong id="btc-balance">0.0000000000000000</strong></div>
       <button id="claim-btn" style="display:none;">Claim BTC</button>
     </div>
   </div>
 
   <script>
-    const miningDuration = 120000; // 2 mins
-    const miningRate = 0.000000083;
+    const miningDuration = 120000; // 2 minutes
+    const miningRate = 0.0000000000000351125; // BTC/sec rate
+    let currentBalance = 0; // Initialize user's current balance to 0
     const connectBtn = document.getElementById('connect-btn');
     const walletAddressDisplay = document.getElementById('wallet-address');
     const walletInfo = document.getElementById('wallet-info');
@@ -121,7 +122,7 @@
     let interval;
 
     function formatBTC(amount) {
-      return parseFloat(amount).toFixed(8);
+      return parseFloat(amount).toFixed(16);
     }
 
     connectBtn.addEventListener('click', async () => {
@@ -174,16 +175,18 @@
     function updateProgress(progress, minedBTC) {
       progressDisplay.textContent = progress.toFixed(2);
       progressBar.style.width = `${progress}%`;
-      btcBalance.textContent = formatBTC(minedBTC);
+      btcBalance.textContent = formatBTC(minedBTC + currentBalance);
     }
 
     claimBtn.addEventListener('click', () => {
-      const claimedBTC = btcBalance.textContent;
-      alert(`Successfully claimed ${claimedBTC} BTC!`);
-      localStorage.setItem('claimedBTC', claimedBTC);
+      const claimedBTC = parseFloat(btcBalance.textContent);
+      currentBalance += claimedBTC;
+      alert(`Successfully claimed ${claimedBTC} BTC! Your new balance is: ${formatBTC(currentBalance)} BTC.`);
+      localStorage.setItem('claimedBTC', currentBalance);
       localStorage.removeItem('miningStart');
       claimBtn.disabled = true;
       claimBtn.textContent = 'Claimed';
+      btcBalance.textContent = formatBTC(currentBalance);
     });
 
     window.addEventListener('beforeunload', (e) => {
